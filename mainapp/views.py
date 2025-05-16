@@ -1,14 +1,14 @@
 import docx2txt
 import fitz  # PyMuPDF
-from django.shortcuts import render
-from .forms import ResumeForm
-
+from django.shortcuts import render,redirect
+from .models import Resume 
+import json  # Add this line at the top
 import docx2txt
 import fitz  # PyMuPDF
-from django.shortcuts import render
 from .forms import ResumeForm
 
 JOB_KEYWORDS = {
+    # Medical Field
     'doctor': ['mbbs', 'md', 'clinical', 'diagnosis', 'treatment', 'medical practice', 'patient care', 'hospital', 'medicine', 'surgeon', 'rounds'],
     'nurse': ['nursing', 'icu', 'patient care', 'hospital', 'emergency', 'bsc nursing', 'gnm', 'medication', 'vital signs', 'monitoring'],
     'pharmacist': ['pharmacy', 'medicines', 'dispensing', 'drug interactions', 'prescription', 'inventory', 'pharmacology'],
@@ -17,12 +17,14 @@ JOB_KEYWORDS = {
     'lab technician': ['lab', 'samples', 'microscope', 'blood test', 'pathology', 'reporting', 'equipment'],
     'medical transcriptionist': ['transcription', 'dictation', 'medical reports', 'audio typing', 'terminology', 'confidentiality'],
 
+    # Legal Field
     'lawyer': ['legal', 'court', 'case', 'advocate', 'litigation', 'contract', 'legal advice', 'client', 'pleading'],
     'judge': ['judicial', 'hearing', 'judgment', 'case law', 'court', 'bench', 'verdict'],
     'legal advisor': ['legal advice', 'consultation', 'compliance', 'law', 'corporate law'],
     'notary public': ['notary', 'authentication', 'certify', 'affidavit', 'oath', 'documents'],
     'legal clerk': ['filing', 'case records', 'court assistance', 'scheduling', 'legal documentation'],
 
+    # Technology Field
     'software developer': ['python', 'java', 'c++', 'git', 'api', 'backend', 'oop', 'debugging', 'programming'],
     'web developer': ['html', 'css', 'javascript', 'react', 'django', 'frontend', 'backend', 'node.js'],
     'frontend developer': ['html', 'css', 'javascript', 'react', 'ui', 'responsive design'],
@@ -32,59 +34,13 @@ JOB_KEYWORDS = {
     'data scientist': ['python', 'machine learning', 'data modeling', 'pandas', 'scikit-learn', 'statistics'],
     'cybersecurity expert': ['network security', 'firewall', 'ethical hacking', 'pen testing', 'vulnerabilities', 'encryption'],
     'mobile app developer': ['android', 'ios', 'flutter', 'react native', 'play store', 'xcode', 'ui/ux'],
-
-    'mechanical engineer': ['solidworks', 'cad', 'mechanical', 'thermodynamics', 'manufacturing', 'design'],
-    'civil engineer': ['autocad', 'construction', 'structure', 'site', 'surveying', 'estimation'],
-    'electrical engineer': ['circuit', 'power', 'load', 'voltage', 'panel', 'design', 'distribution'],
-    'electronics engineer': ['pcb', 'microcontroller', 'signal', 'semiconductor', 'sensor', 'arduino'],
-    'computer engineer': ['networking', 'programming', 'systems', 'hardware', 'os', 'security'],
-    'automobile engineer': ['vehicle', 'engine', 'automobile', 'repair', 'maintenance', 'testing'],
-
-    'technician': ['troubleshoot', 'repair', 'installation', 'equipment', 'tools', 'wiring'],
-    'mechanic': ['engine', 'vehicle', 'maintenance', 'bike', 'automobile', 'repair'],
-    'plumber': ['pipe', 'fittings', 'water', 'leak', 'valve', 'installation'],
-    'welder': ['welding', 'arc', 'mild steel', 'mig', 'tig', 'metal'],
-    'cnc operator': ['cnc', 'lathe', 'machine', 'cutting', 'programming', 'drill'],
-
-    'chartered accountant': ['ca', 'audit', 'tax', 'finance', 'ledger', 'balance sheet', 'compliance'],
-    'company secretary': ['cs', 'company law', 'meetings', 'statutory', 'roc', 'compliance'],
-    'banker': ['banking', 'loan', 'credit', 'customer', 'branch', 'transactions'],
-    'accountant': ['tally', 'gst', 'income tax', 'accounting', 'invoice', 'ledger'],
-    'investment analyst': ['stocks', 'equity', 'portfolio', 'risk analysis', 'market', 'returns'],
-
-    'chef': ['cooking', 'kitchen', 'menu', 'recipe', 'food safety', 'ingredients'],
-    'hotel manager': ['hospitality', 'guest', 'room', 'front office', 'booking', 'management'],
-    'waiter': ['service', 'table', 'order', 'hospitality', 'customer'],
-    'bartender': ['cocktail', 'mixing', 'bar', 'beverage', 'alcohol'],
-    'baker': ['baking', 'bread', 'cake', 'oven', 'pastry', 'dough'],
-
-    'school teacher': ['teaching', 'syllabus', 'lesson plan', 'student', 'classroom', 'homework'],
-    'college professor': ['lecture', 'university', 'research', 'syllabus', 'seminar', 'paper'],
-    'tuition teacher': ['coaching', 'subjects', 'board exam', 'students', 'classes'],
-    'trainer': ['training', 'coaching', 'skills', 'mentoring', 'curriculum'],
-
-    'ias': ['upsc', 'civil services', 'governance', 'policy', 'administration', 'public'],
-    'police officer': ['law enforcement', 'crime', 'investigation', 'patrol', 'firs'],
-    'defense': ['army', 'navy', 'air force', 'defense', 'training', 'operations'],
-    'railway employee': ['railway', 'operations', 'track', 'station', 'train'],
-    'post office staff': ['postal', 'mail', 'sorting', 'delivery', 'parcel'],
-
-    'construction worker': ['masonry', 'cement', 'scaffolding', 'labor', 'construction'],
-    'site supervisor': ['construction', 'site', 'supervision', 'labour', 'material'],
-    'architect': ['design', 'autocad', 'blueprint', 'architecture', 'plan'],
-    'mason': ['brick', 'plaster', 'cement', 'construction', 'labour'],
-
-    'graphic designer': ['photoshop', 'illustrator', 'design', 'poster', 'layout'],
-    'fashion designer': ['garment', 'fashion', 'trend', 'design', 'stitching'],
-    'photographer': ['camera', 'dslr', 'shoot', 'editing', 'portrait'],
-    'interior designer': ['space planning', 'decor', 'interior', 'furniture', 'autocad'],
-    'animator': ['animation', '2d', '3d', 'vfx', 'maya', 'after effects'],
-
-    'sales executive': ['sales', 'target', 'lead', 'crm', 'product', 'customer'],
-    'digital marketer': ['seo', 'sem', 'google ads', 'social media', 'analytics'],
-    'seo specialist': ['seo', 'keyword', 'ranking', 'backlink', 'optimization'],
-    'content writer': ['content', 'blog', 'article', 'writing', 'grammar'],
-    'social media manager': ['facebook', 'instagram', 'campaign', 'engagement', 'posts']
+    'cloud engineer': ['aws', 'azure', 'gcp', 'cloud computing', 'deployment', 'containers', 'kubernetes', 'docker'],
+    'network engineer': ['networking', 'routing', 'switching', 'firewalls', 'vpn', 'lan', 'wan'],
+    'robotic engineer': ['robotics', 'automation', 'control systems', 'mechatronics', 'sensors', 'actuators'],
+    'blockchain developer': ['blockchain', 'smart contracts', 'ethereum', 'solidity', 'distributed ledger', 'decentralized'],
+    'devops engineer': ['ci/cd', 'automation', 'docker', 'kubernetes', 'infrastructure', 'monitoring'],
+    'ai engineer': ['artificial intelligence', 'machine learning', 'neural networks', 'deep learning', 'nlp', 'automation'],
+    'iot developer': ['internet of things', 'sensors', 'automation', 'smart devices', 'raspberry pi', 'arduino']
 }
 
 def extract_text_from_docx(file_path):
@@ -112,7 +68,9 @@ def ats_score(resume_text, job_role):
     if total == 0:
         return "No keywords found for selected role.", []
     percentage = (score / total) * 100
+    print(percentage)
     return f"ATS Score: {score}/{total} ({percentage:.0f}%)", matched
+    
 
 def upload_resume(request):
     result = None
@@ -146,6 +104,19 @@ def upload_resume(request):
 
                 if resume_text:
                     result, matched_keywords = ats_score(resume_text, selected_role)
+                    if "ATS Score:" in result:
+                        try:
+                            percentage = float(result.split('(')[1].split('%')[0])
+                            resume.ats_score = percentage
+                        except (IndexError, ValueError):
+                            resume.ats_score = 0
+                    else:
+                        resume.ats_score = 0
+                    
+                    resume.matched_keywords = json.dumps(matched_keywords)
+                    resume.raw_text = resume_text
+                    resume.job_role = selected_role
+                    resume.save()
                 else:
                     result = "No text extracted from the resume."
             except Exception as e:
@@ -162,3 +133,17 @@ def upload_resume(request):
         'roles': JOB_KEYWORDS.keys(),
         'selected_role': selected_role
     })
+
+
+
+def high_score_resumes(request):
+    # Get resumes with ATS score > 50%
+    high_scoring_resumes = Resume.objects.filter(ats_score__gt=50).order_by('-ats_score')
+    
+    return render(request, 'high_score_resumes.html', {
+        'resumes': high_scoring_resumes
+    })
+
+
+def home(request):
+    return render(request,'homepage.html')
