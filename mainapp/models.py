@@ -27,7 +27,7 @@ CATEGORY_CHOICE = (
 
 class Resume(models.Model):
     name = models.CharField(max_length=100)
-    phone_number = models.CharField(max_length=10,default='0000000000')
+    phone_number = models.CharField(max_length=10,default='91+00000000')
     qualification = models.CharField(choices=CATEGORY_CHOICE,max_length=15)
     file = models.FileField(upload_to='resumes/')
     uploaded_at = models.DateTimeField(auto_now_add=True)

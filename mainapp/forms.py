@@ -4,7 +4,7 @@ from .models import Resume
 class ResumeForm(forms.ModelForm):
     class Meta:
         model = Resume
-        fields = ['file']
+        fields = ['name','phone_number','qualification','file']
 
     def clean_file(self):
         file = self.cleaned_data.get('file')

@@ -1,11 +1,12 @@
 import docx2txt
 import fitz  # PyMuPDF
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from .models import Resume 
 import json  # Add this line at the top
 import docx2txt
 import fitz  # PyMuPDF
 from .forms import ResumeForm
+from django.http import FileResponse
 
 JOB_KEYWORDS = {
     # Medical Field
@@ -40,7 +41,12 @@ JOB_KEYWORDS = {
     'blockchain developer': ['blockchain', 'smart contracts', 'ethereum', 'solidity', 'distributed ledger', 'decentralized'],
     'devops engineer': ['ci/cd', 'automation', 'docker', 'kubernetes', 'infrastructure', 'monitoring'],
     'ai engineer': ['artificial intelligence', 'machine learning', 'neural networks', 'deep learning', 'nlp', 'automation'],
-    'iot developer': ['internet of things', 'sensors', 'automation', 'smart devices', 'raspberry pi', 'arduino']
+    'iot developer': ['internet of things', 'sensors', 'automation', 'smart devices', 'raspberry pi', 'arduino'],
+    'php developer' : [
+        'php','laravel','codeigniter','symfony','oop','mysql','postgresql','database_management','rest_api','soap_api','html','css',
+        'javascript','jquery','ajax','version_control','git','mvc','debugging','backend','composer','deployment','server_management','linux',
+        'api_integration','problem_solving','unit_testing','secure_coding'
+    ]
 }
 
 def extract_text_from_docx(file_path):
@@ -139,11 +145,54 @@ def upload_resume(request):
 def high_score_resumes(request):
     # Get resumes with ATS score > 50%
     high_scoring_resumes = Resume.objects.filter(ats_score__gt=50).order_by('-ats_score')
+    return render(request, 'high_score_resumes.html', {'resumes': high_scoring_resumes})
+
+
     
-    return render(request, 'high_score_resumes.html', {
-        'resumes': high_scoring_resumes
-    })
+def resume_detail(request, resume_id):
+    resume = get_object_or_404(Resume, id=resume_id)
+    file_url = resume.file.url
+    is_pdf = file_url.endswith('.pdf')
+    
+    return render(request, 'resume_detail.html',{
+        'resume': resume,
+        'file_url': file_url,
+        'is_pdf': is_pdf
+        
+        })
+
+
+
+def download_resume(request, resume_id):
+    resume = get_object_or_404(Resume, id=resume_id)
+    response = FileResponse(open(resume.file.path, 'rb'))
+    response['Content-Disposition'] = f'attachment; filename="{resume.file.name}"'
+    return response
 
 
 def home(request):
     return render(request,'homepage.html')
+
+
+def resume_filter(request):
+    job_role = request.GET.get('job_role', None)
+    min_score = request.GET.get('min_score', 0)
+    
+    try:
+        min_score = float(min_score)
+    except (ValueError, TypeError):
+        min_score = 0
+    
+    resumes = Resume.objects.all()
+    
+    if job_role:
+        resumes = resumes.filter(job_role__iexact=job_role)
+    
+    resumes = resumes.filter(ats_score__gte=min_score).order_by('-ats_score')
+    
+    return render(request, 'filter.html', {
+        'resumes': resumes,
+        'roles': JOB_KEYWORDS.keys(),
+        'selected_role': job_role,
+        'min_score': min_score
+    })
