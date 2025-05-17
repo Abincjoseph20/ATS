@@ -43,8 +43,11 @@ JOB_KEYWORDS = {
     'ai engineer': ['artificial intelligence', 'machine learning', 'neural networks', 'deep learning', 'nlp', 'automation'],
     'iot developer': ['internet of things', 'sensors', 'automation', 'smart devices', 'raspberry pi', 'arduino'],
     'php developer' : [
-        'php','laravel','codeigniter','symfony','oop','mysql','postgresql','database_management','rest_api','soap_api','html','css',
-        'javascript','jquery','ajax','version_control','git','mvc','debugging','backend','composer','deployment','server_management','linux',
+        'php','laravel','codeigniter','symfony',
+        'oop','mysql','postgresql',
+        'database_management','rest_api','soap_api','html','css',
+        'javascript','jquery','ajax','version_control','git','mvc',
+        'debugging','backend','composer','deployment','server_management','linux',
         'api_integration','problem_solving','unit_testing','secure_coding'
     ]
 }
