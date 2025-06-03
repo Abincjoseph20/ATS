@@ -132,13 +132,16 @@ STATICFILES_DIRS = [
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Static files (CSS, JavaScript, Images)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# # Static files (CSS, JavaScript, Images)
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static'),
+# ]
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Media files (Uploaded by users)
+# # Media files (Uploaded by users)
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 

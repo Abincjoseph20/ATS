@@ -209,16 +209,34 @@
         </a>
     </div>
 
+
+
     {% if is_pdf %}
     <div class="resume-viewer">
-        <iframe 
-            src="{{ resume.file.url }}" 
-            style="width:100%; height:600px; border: none;">
-        </iframe>
+        {% comment %} <iframe 
+            src="{{ file_url }}" 
+            style="width:100%; height:600px; border:none;" 
+            aria-label="PDF Viewer">
+        </iframe> {% endcomment %}
+            {% if is_pdf %}
+            <iframe src="{{ file_url }}" width="100%" height="600px" style="border: none;"></iframe>
+        {% else %}
+            <p>This file is not previewable. <a href="{{ file_url }}">Download Resume</a></p>
+        {% endif %}
     </div>
     {% else %}
-        <p>This file is not a PDF. You can <a href="{{ file_url }}" download>download it here</a>.</p>
-    {% endif %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> 
+            This file format cannot be previewed. 
+            <a href="{{ file_url }}" download class="btn btn-sm btn-primary">
+                <i class="fas fa-download"></i> Download File
+            </a>
+        </div>
+
+
+        
+    {% endif %} 
+    
 </div>
 {% endblock %}
 

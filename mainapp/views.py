@@ -42,6 +42,8 @@ JOB_KEYWORDS = {
     'devops engineer': ['ci/cd', 'automation', 'docker', 'kubernetes', 'infrastructure', 'monitoring'],
     'ai engineer': ['artificial intelligence', 'machine learning', 'neural networks', 'deep learning', 'nlp', 'automation'],
     'iot developer': ['internet of things', 'sensors', 'automation', 'smart devices', 'raspberry pi', 'arduino'],
+    'marketing': ['branding', 'digital marketing', 'content creation', 'SEO', 'social media', 'email marketing'],
+    'sales': ['lead generation', 'sales strategy', 'negotiation', 'client relationship', 'CRM', 'cold calling'],
     'php developer' : [
         'php','laravel','codeigniter','symfony',
         'oop','mysql','postgresql',
@@ -49,7 +51,17 @@ JOB_KEYWORDS = {
         'javascript','jquery','ajax','version_control','git','mvc',
         'debugging','backend','composer','deployment','server_management','linux',
         'api_integration','problem_solving','unit_testing','secure_coding'
-    ]
+    ],'HR Recruiter' :[  
+        'talent acquisition', 'candidate sourcing', 'applicant tracking systems (ATS)',  
+        'LinkedIn Recruiter', 'job post optimization', 'employer branding',  
+        'interview coordination', 'workforce planning', 'compensation benchmarking',  
+        'diversity hiring', 'HR compliance', 'behavioral interviewing',  
+        'candidate assessment', 'onboarding strategies', 'employee retention',  
+        'Glassdoor management', 'Boolean search', 'HR analytics', 'ATS integrations',  
+        'EEOC compliance', 'cold outreach', 'job market analysis', 'salary negotiations',  
+        'workday recruitment', 'greenhouse software', 'indeed hiring platform',  
+        'candidate pipelining', 'skills gap analysis', 'recruitment marketing'  
+        ]
 }
 
 def extract_text_from_docx(file_path):
@@ -150,20 +162,47 @@ def high_score_resumes(request):
     high_scoring_resumes = Resume.objects.filter(ats_score__gt=50).order_by('-ats_score')
     return render(request, 'high_score_resumes.html', {'resumes': high_scoring_resumes})
 
-
+  
+# def resume_detail(request, resume_id):
+#     resume = get_object_or_404(Resume, id=resume_id)
+#     file_url = request.build_absolute_uri(resume.file.url)  
+#     is_pdf = file_url.endswith('.pdf')
     
+#     return render(request, 'resume_detail.html',{
+#         'resume': resume,
+#         'file_url': file_url,
+#         'is_pdf': is_pdf
+        
+#         })
+
+# def resume_detail(request, resume_id):
+#     resume = get_object_or_404(Resume, id=resume_id)
+    
+#     # Get the file URL
+#     file_url = resume.file.url if resume.file else None
+    
+#     # Determine if the file is a PDF (for preview)
+#     is_pdf = file_url.lower().endswith('.pdf') if file_url else False
+
+#     context = {
+#         'resume': resume,
+#         'file_url': request.build_absolute_uri(file_url) if file_url else None,
+#         'is_pdf': is_pdf
+#     }
+
+#     return render(request, 'resume_detail.html', context)
+
+
 def resume_detail(request, resume_id):
     resume = get_object_or_404(Resume, id=resume_id)
-    file_url = resume.file.url
-    is_pdf = file_url.endswith('.pdf')
-    
-    return render(request, 'resume_detail.html',{
+    file_url = resume.file.url if resume.file else None
+    is_pdf = file_url.lower().endswith('.pdf') if file_url else False
+
+    return render(request, 'resume_detail.html', {
         'resume': resume,
         'file_url': file_url,
         'is_pdf': is_pdf
-        
-        })
-
+    })
 
 
 def download_resume(request, resume_id):
@@ -172,9 +211,6 @@ def download_resume(request, resume_id):
     response['Content-Disposition'] = f'attachment; filename="{resume.file.name}"'
     return response
 
-
-def home(request):
-    return render(request,'homepage.html')
 
 
 def resume_filter(request):
@@ -199,3 +235,7 @@ def resume_filter(request):
         'selected_role': job_role,
         'min_score': min_score
     })
+    
+    
+def home(request):
+    return render(request,'homepage.html')
